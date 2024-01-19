@@ -14,6 +14,9 @@ dependencies:
   fs:
     specifier: 0.0.1-security
     version: 0.0.1-security
+  node-appwrite:
+    specifier: ^11.1.0
+    version: 11.1.0
 
 packages:
 
@@ -76,6 +79,15 @@ packages:
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.52.0
+    dev: false
+
+  /node-appwrite@11.1.0:
+    resolution: {integrity: sha512-yA6gNhgEPaxRtPtd7vr7rE3nsl/ZjPsUzGwGe7GXwWShzKp1ngUOdznYuack5SZVttX52P8ToqnrHOWhgiDzVA==}
+    dependencies:
+      axios: 1.6.2
+      form-data: 4.0.0
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /proxy-from-env@1.1.0:

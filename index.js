@@ -1,72 +1,63 @@
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
+import { Client, Storage, Databases, ID, InputFile } from "node-appwrite";
+import fs from "fs";
+import path from "path";
 
-const folderPath = "C:\\Users\\Artificial\\Desktop\\media2";
+const client = new Client();
 
-const form = new FormData();
-form.append('video', fs.createReadStream(folderPath + '\\albenia.mp4'));
+const storage = new Storage(client);
 
-axios.post('http://localhost:3000/upload', form, {
-    headers: form.getHeaders()
-})
-    .then((response) => {
-        console.log(response.data);
-    })
-    .catch((error) => {
-        console.error(error);
-    });
+const databases = new Databases(client);
 
-return;
+client
+    .setEndpoint("https://back.arti.lol/v1")
+    .setProject("65a995acebc18055db26")
+    .setKey('432e8835a7f5bc1cd015c58e577b53e6fd22f0e3283a9f5178b182a449a28508fed4b8fd46517005ae2b8b5b1fcc765ecc396f66062a76fc6c02326e71c33de00b1e2907462693c914e0d05dff78ff7cf8c3a25068e57d57b64f0b6fedab186ead5c4fcdcb404ca4b1fd4968064d3d8fd2bb7a97ca1d6c1754183bafdf0a584c')
+    ;
 
-const data = {
-    "data": {
-        "title": "My Video Title",
-        "description": "This is a description of my video.",
-        "date_created": "2022-01-01T00:00:00Z", // ISO 8601 date format
-        "creator": 1 // ID of the related creator
-    }
-};
+const filePath = "C:\\Users\\Artificial\\Desktop\\media\\minion vrchat.mp4";
 
-axios.post('http://localhost:1337/api/videos', data, {
-    headers: {
-        Authorization: 'Bearer b2c84d3c378cc9639d6df44d7ca229753e533120ad16f26c44cf37c4aa08410636f071df953ac676abf3673b424dc6dfac65bfc63cf116a57275676501fe26419a7e99d0740e2ceabe1ac0680feb4affecb122c04119c63db801f2c1ff34b1c0900bd64d870ec1b07c2f52f66e9c5d8614e65a76708a065a779eac1e5dd6ba74',
-    }
-})
-    .then(response => {
-        console.log(response.data);
-    })
-    .catch(error => {
-        console.error(error);
-    });
 
-// Read the files in the folder
+async function uploadFile(filePath, creator) {
+    // get datecreated from file
+    const fileStats = fs.statSync(filePath);
+    const dateCreated = fileStats.birthtime;
+
+    const fileName = path.basename(filePath, path.extname(filePath));
+
+    let filestorage = await storage.createFile(
+        "videos",
+        ID.unique(),
+        InputFile.fromPath(filePath, fileName)
+    );
+
+    let videodoc = await databases.createDocument(
+        'videos',
+        'typh',
+        ID.unique(),
+        {
+            title: fileName,
+            createdDate: dateCreated,
+            videoID: filestorage.$id,
+            creators: creator,
+        }
+    );
+
+    console.log(filestorage);
+    console.log(videodoc);
+}
+
+
+const folderPath = "D:\\Server Stuff\\Misc. Websites\\animationmemes.arti.lol (10-15-2023)\\typh";
+
 fs.readdir(folderPath, async (err, files) => {
     if (err) {
-        console.error('Error reading folder:', err);
+        console.error(err);
         return;
     }
 
-    // Iterate through each file
     for (const file of files) {
+        if (path.extname(file) !== ".mp4") return;
         const filePath = path.join(folderPath, file);
-
-        // Create a FormData object to send the file
-        const formData = new FormData();
-        formData.append('file', fs.createReadStream(filePath));
-
-        try {
-            // Send a POST request to the Strapi4 instance
-            const response = await axios.post(apiUrl, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': 'Bearer b2c84d3c378cc9639d6df44d7ca229753e533120ad16f26c44cf37c4aa08410636f071df953ac676abf3673b424dc6dfac65bfc63cf116a57275676501fe26419a7e99d0740e2ceabe1ac0680feb4affecb122c04119c63db801f2c1ff34b1c0900bd64d870ec1b07c2f52f66e9c5d8614e65a76708a065a779eac1e5dd6ba74',
-                }
-            });
-
-            console.log(`Uploaded ${file} successfully. Response:`, response.data);
-        } catch (error) {
-            console.error(`Error uploading ${file}:`, error.response.data);
-        }
+        await uploadFile(filePath, "65a9b33ef1b8e8743c0e");
     }
 });
