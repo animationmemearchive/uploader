@@ -29,12 +29,14 @@ async function uploadFile(filePath, creator) {
         InputFile.fromPath(filePath, fileName)
     );
 
+    const nameCleaned = fileName.replace(/_/g, ' ').toLowerCase();
+
     let videodoc = await databases.createDocument(
         'videos',
         'typh',
         ID.unique(),
         {
-            title: fileName,
+            title: nameCleaned,
             createdDate: dateCreated,
             videoID: filestorage.$id,
             creators: creator,
@@ -54,9 +56,10 @@ fs.readdir(folderPath, async (err, files) => {
         return;
     }
 
-    for (const file of files) {
-        if (path.extname(file) !== ".mp4") return;
+    files.forEach(async file => {
+        if (path.extname(file) != ".mp4") return;
+        console.log(file);
         const filePath = path.join(folderPath, file);
         await uploadFile(filePath, "65a9b33ef1b8e8743c0e");
-    }
+    });
 });
