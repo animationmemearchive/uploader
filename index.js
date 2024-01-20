@@ -48,7 +48,7 @@ async function uploadFile(filePath, creator) {
 }
 
 
-const folderPath = "D:\\Server Stuff\\Misc. Websites\\animationmemes.arti.lol (10-15-2023)\\typh";
+const folderPath = process.env.FOLDER_PATH; // fuck you butterroach
 
 fs.readdir(folderPath, async (err, files) => {
     if (err) {
@@ -60,6 +60,11 @@ fs.readdir(folderPath, async (err, files) => {
         if (path.extname(file) != ".mp4") return;
         console.log(file);
         const filePath = path.join(folderPath, file);
-        await uploadFile(filePath, "65a9b33ef1b8e8743c0e");
+
+        try {
+            await uploadFile(filePath, "65a9b33ef1b8e8743c0e");
+        } catch (error) {
+            console.error(error);
+        }
     });
 });
