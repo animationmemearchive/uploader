@@ -2,6 +2,7 @@ import { Client, Storage, Databases, ID, InputFile } from "node-appwrite";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
+import { exec } from 'child_process';
 
 dotenv.config();
 
@@ -19,14 +20,22 @@ client
 async function uploadFile(filePath, creator) {
     // get datecreated from file
     const fileStats = fs.statSync(filePath);
-    const dateCreated = fileStats.birthtime;
+    const dateCreated = fileStats.mtime;
 
     const fileName = path.basename(filePath, path.extname(filePath));
+
+    const pngFilePath = path.join(path.dirname(filePath), `${fileName}.png`);
 
     let filestorage = await storage.createFile(
         "videos",
         ID.unique(),
         InputFile.fromPath(filePath, fileName)
+    );
+
+    let thumbstorage = await storage.createFile(
+        "thumbnails",
+        ID.unique(),
+        InputFile.fromPath(pngFilePath, fileName)
     );
 
     const nameCleaned = fileName.replace(/_/g, ' ').toLowerCase();
@@ -39,6 +48,7 @@ async function uploadFile(filePath, creator) {
             title: nameCleaned,
             createdDate: dateCreated,
             videoID: filestorage.$id,
+            thumbID: thumbstorage.$id,
             creators: creator,
         }
     );
@@ -62,7 +72,7 @@ fs.readdir(folderPath, async (err, files) => {
         const filePath = path.join(folderPath, file);
 
         try {
-            await uploadFile(filePath, "65a9b33ef1b8e8743c0e");
+            await uploadFile(filePath, process.env.CREATOR_ID);
         } catch (error) {
             console.error(error);
         }

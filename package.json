@@ -12,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "node-appwrite": "^11.1.0"
+    "node-appwrite": "^11.1.0",
+    "ytdl-core": "^4.11.5",
+    "ytpl": "^2.3.0"
   }
 }
